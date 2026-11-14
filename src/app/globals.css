@@ -3,35 +3,38 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg: #f4f6f7;
+  color-scheme: light;
+  --bg: #f5f7fb;
   --surface: #ffffff;
-  --surface-2: #eef1f3;
-  --line: #dfe4e8;
-  --ink: #14212b;
-  --muted: #5d6c78;
-  --brand: #0b6b6f;          /* Indian Ocean teal */
+  --surface-2: #f0f3f8;
+  --line: #e5eaf1;
+  --ink: #172334;
+  --muted: #718096;
+  --brand: #4f46e5;
   --brand-ink: #ffffff;
-  --brand-soft: #dff0f0;
-  --accent: #d99a1e;         /* saffron, used sparingly */
-  --danger: #b42318;
-  --success: #067647;
-  --radius: 10px;
+  --brand-soft: #eef2ff;
+  --accent: #d97706;
+  --danger: #dc2626;
+  --success: #059669;
+  --radius: 14px;
+  --shadow-card: 0 1px 2px rgb(16 24 40 / .04), 0 8px 24px rgb(16 24 40 / .035);
 }
 .dark {
-  --bg: #0d151b;
-  --surface: #131d25;
-  --surface-2: #1a2631;
-  --line: #243442;
-  --ink: #e8eef2;
-  --muted: #8fa1ae;
-  --brand: #3bb3b8;
-  --brand-ink: #06262a;
-  --brand-soft: #14363a;
-  --accent: #e8b04a;
-  --danger: #f97066;
-  --success: #47cd89;
+  color-scheme: dark;
+  --bg: #0b1220;
+  --surface: #111b2d;
+  --surface-2: #18253a;
+  --line: #26364d;
+  --ink: #e8eef8;
+  --muted: #94a3b8;
+  --brand: #818cf8;
+  --brand-ink: #11152d;
+  --brand-soft: #242a50;
+  --accent: #fbbf24;
+  --danger: #f87171;
+  --success: #34d399;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / .12), 0 10px 30px rgb(0 0 0 / .12);
 }
-
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -47,8 +50,17 @@
   --color-success: var(--success);
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
 }
-
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+::selection { background: var(--brand-soft); color: var(--ink); }
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .num { font-variant-numeric: tabular-nums; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:not(:disabled) { cursor: pointer; }
+input, select, textarea { color: var(--ink); }
+input::placeholder, textarea::placeholder { color: var(--muted); }
+table { border-collapse: collapse; }
+tbody tr { transition: background-color .16s ease; }
+tbody tr:hover { background: color-mix(in srgb, var(--surface-2) 65%, transparent); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
