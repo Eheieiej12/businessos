@@ -24,7 +24,6 @@ export function Shell({ items, business, user, children }: {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const icons = Object.fromEntries(NAV.map((n) => [n.href, n.icon]));
-  const visible = new Set(items.map((item) => item.href));
 
   const nav = (
     <nav className="min-h-0 flex-1 space-y-6 overflow-y-auto px-3 pb-3">
