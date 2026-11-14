@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireContext } from "@/server/context";
+import { can } from "@/lib/permissions";
 import { createCategoryAction, createProductAction, recordStockMovementAction } from "@/server/inventory-actions";
 
 type SearchParams = Promise<{ q?: string; error?: string; success?: string }>;
@@ -65,9 +66,18 @@ async function InventoryContent({ searchParams }: { searchParams: SearchParams }
     balanceByProduct.set(row.productId, (balanceByProduct.get(row.productId) ?? 0) + quantity);
     balanceByProductBranch.set(`${row.productId}:${row.branchId}`, quantity);
   }
-  const lowStock = products.filter((product) =>
-    product.active && product.trackStock && (balanceByProduct.get(product.id) ?? 0) <= product.reorderLevel
-  ).length;
+  const lowStockProductIds = new Set<string>();
+  for (const product of products) {
+    if (!product.active || !product.trackStock) continue;
+    for (const branch of branches) {
+      const quantity = balanceByProductBranch.get(`${product.id}:${branch.id}`) ?? 0;
+      if (quantity <= product.reorderLevel) {
+        lowStockProductIds.add(product.id);
+        break;
+      }
+    }
+  }
+  const lowStock = lowStockProductIds.size;
 
   return (
     <div className="space-y-6">
@@ -100,7 +110,7 @@ async function InventoryContent({ searchParams }: { searchParams: SearchParams }
                   <tbody className="divide-y divide-line">
                     {products.map((product) => {
                       const quantity = balanceByProduct.get(product.id) ?? 0;
-                      const isLow = product.active && product.trackStock && quantity <= product.reorderLevel;
+                      const isLow = product.active && product.trackStock && lowStockProductIds.has(product.id);
                       return (
                         <tr key={product.id}>
                           <td className="min-w-52 px-4 py-3"><p className="font-medium">{product.name}</p><p className="mt-0.5 text-xs text-muted">{product.sku}{product.barcode ? ` · ${product.barcode}` : ""}</p></td>
@@ -128,7 +138,7 @@ async function InventoryContent({ searchParams }: { searchParams: SearchParams }
                   <tbody className="divide-y divide-line">
                     {products.filter((p) => p.trackStock).flatMap((product) => branches.map((branch) => {
                       const quantity = balanceByProductBranch.get(`${product.id}:${branch.id}`) ?? 0;
-                      return <tr key={`${product.id}:${branch.id}`}><td className="px-4 py-3 font-medium">{product.name}</td><td className="px-4 py-3 text-muted">{branch.name}</td><td className={`px-4 py-3 num ${quantity <= product.reorderLevel ? "text-amber-700 dark:text-amber-300" : ""}`}>{quantity} {product.unit}</td><td className="px-4 py-3 num">{product.reorderLevel}</td></tr>;
+                      return <tr key={`${product.id}:${branch.id}`}><td className="px-4 py-3 font-medium">{product.name}</td><td className="px-4 py-3 text-muted">{branch.name}</td><td className={`px-4 py-3 num ${quantity <= product.reorderLevel ? "text-amber-700 dark:text-amber-300" : ""}`}>{quantity} {product.unit}{quantity <= product.reorderLevel && <span className="ml-2 text-xs">Low</span>}</td><td className="px-4 py-3 num">{product.reorderLevel}</td></tr>;
                     }))}
                   </tbody>
                 </table>
@@ -138,7 +148,7 @@ async function InventoryContent({ searchParams }: { searchParams: SearchParams }
         </section>
 
         <aside className="space-y-5">
-          {ctx.role && (ctx.role === "OWNER" || ctx.role === "MANAGER" || ctx.role === "STOCK_KEEPER") && (
+          {can(ctx.role, "inventory.manage") && (
             <>
               <form action={createProductAction} className="space-y-3 rounded-xl border border-line bg-surface p-4">
                 <h2 className="font-semibold">Add product</h2>
@@ -172,7 +182,7 @@ async function InventoryContent({ searchParams }: { searchParams: SearchParams }
                 <h2 className="font-semibold">Stock movement</h2>
                 <label className={labelClass}>Product<select name="productId" required className={fieldClass}><option value="">Select product</option>{products.filter((p) => p.active && p.trackStock).map((product) => <option key={product.id} value={product.id}>{product.name} ({product.sku})</option>)}</select></label>
                 <label className={labelClass}>Branch<select name="branchId" required className={fieldClass}><option value="">Select branch</option>{branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
-                <label className={labelClass}>Movement<select name="movement" defaultValue="in" className={fieldClass}><option value="in">Stock in</option><option value="out">Stock out</option><option value="adjustment">Positive adjustment</option></select></label>
+                <label className={labelClass}>Movement<select name="movement" defaultValue="in" className={fieldClass}><option value="in">Stock in</option><option value="out">Stock out</option><option value="adjustment-in">Adjustment (increase)</option><option value="adjustment-out">Adjustment (decrease)</option></select></label>
                 <label className={labelClass}>Quantity<input name="quantity" type="number" min="1" step="1" required className={fieldClass} /></label>
                 <label className={labelClass}>Unit cost (optional)<input name="unitCost" type="number" min="0" step="0.01" className={fieldClass} /></label>
                 <label className={labelClass}>Note<input name="note" maxLength={500} className={fieldClass} /></label>
