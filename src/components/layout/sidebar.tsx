@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Moon, Sun, LogOut, Menu, X, Command, ChevronDown, PanelLeftClose, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NAV } from "./nav";
 import { logoutAction } from "@/server/auth-actions";
 
@@ -21,8 +21,6 @@ export function Shell({ items, business, user, children }: {
 }) {
   const path = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const icons = Object.fromEntries(NAV.map((n) => [n.href, n.icon]));
@@ -70,7 +68,7 @@ export function Shell({ items, business, user, children }: {
           {!collapsed && <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{user}</p><p className="text-[10px] text-muted">Workspace member</p></div>}
         </div>
         <div className={`flex ${collapsed ? "flex-col" : ""} gap-1`}>
-          <button aria-label="Toggle theme" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted hover:bg-surface-2">{!mounted ? <Moon size={15}/> : resolvedTheme === "dark" ? <Sun size={15}/> : <Moon size={15}/>} {!collapsed && (!mounted ? "Theme" : resolvedTheme === "dark" ? "Light mode" : "Dark mode")}</button>
+          <button aria-label="Toggle theme" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted hover:bg-surface-2"><Moon size={15} className="block dark:hidden"/><Sun size={15} className="hidden dark:block"/> {!collapsed && "Toggle theme"}</button>
           <form action={logoutAction} className="flex-1"><button aria-label="Sign out" className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-muted hover:bg-danger/10 hover:text-danger"><LogOut size={15}/>{!collapsed && "Sign out"}</button></form>
         </div>
       </div>
@@ -86,7 +84,7 @@ export function Shell({ items, business, user, children }: {
             <button aria-label="Open menu" onClick={() => setOpen(true)} className="rounded-xl border border-line p-2 text-muted lg:hidden"><Menu size={18}/></button>
             <div className="min-w-0"><p className="truncate text-[11px] font-medium text-muted">YOUR WORKSPACE</p><p className="truncate text-sm font-semibold tracking-tight">{NAV.find(n => path === n.href || path.startsWith(n.href + "/"))?.label ?? "Overview"}</p></div>
           </div>
-          <div className="flex items-center gap-2"><button aria-label="Toggle theme" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="rounded-xl border border-line bg-surface p-2.5 text-muted shadow-sm transition hover:bg-surface-2 hover:text-ink">{!mounted ? <Moon size={16}/> : resolvedTheme === "dark" ? <Sun size={16}/> : <Moon size={16}/>}</button><div className="hidden size-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-violet-500 text-xs font-bold text-white shadow-sm sm:grid">{user.slice(0,1).toUpperCase()}</div></div>
+          <div className="flex items-center gap-2"><button aria-label="Toggle theme" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="rounded-xl border border-line bg-surface p-2.5 text-muted shadow-sm transition hover:bg-surface-2 hover:text-ink"><Moon size={16} className="block dark:hidden"/><Sun size={16} className="hidden dark:block"/></button><div className="hidden size-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-violet-500 text-xs font-bold text-white shadow-sm sm:grid">{user.slice(0,1).toUpperCase()}</div></div>
         </header>
         <main className="mx-auto w-full max-w-[1680px] p-4 sm:p-6 lg:p-9">{children}</main>
       </div>
