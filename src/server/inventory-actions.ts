@@ -147,7 +147,7 @@ export async function createCategoryAction(formData: FormData) {
 const stockSchema = z.object({
   productId: z.string().min(1),
   branchId: z.string().min(1),
-  movement: z.enum(["in", "out", "adjustment"]),
+  movement: z.enum(["in", "out", "adjustment-in", "adjustment-out"]),
   quantity: z.coerce.number().int().positive().max(100000000),
   unitCost: z.coerce.number().finite().min(0).max(999999999).optional(),
   note: z.string().trim().max(500).optional(),
@@ -176,7 +176,8 @@ export async function recordStockMovementAction(formData: FormData) {
     if (!product) throw new Error("Selected product was not found.");
     if (!product.trackStock) throw new Error("Stock tracking is disabled for this product.");
 
-    const signedQuantity = data.movement === "out" ? -data.quantity : data.quantity;
+    const isDecrease = data.movement === "out" || data.movement === "adjustment-out";
+    const signedQuantity = isDecrease ? -data.quantity : data.quantity;
     const type: StockMoveType = data.movement === "in" ? "PURCHASE" : "ADJUSTMENT";
     await db.$transaction(async (tx) => {
       const current = await tx.stockMovement.aggregate({
@@ -195,7 +196,7 @@ export async function recordStockMovementAction(formData: FormData) {
           type,
           quantity: signedQuantity,
           unitCost: data.unitCost === undefined ? product.costPrice : new Prisma.Decimal(data.unitCost),
-          note: data.note || (data.movement === "in" ? "Stock received" : data.movement === "out" ? "Stock issued" : "Stock adjustment"),
+          note: data.note || (data.movement === "in" ? "Stock received" : data.movement === "out" ? "Stock issued" : data.movement === "adjustment-out" ? "Stock adjustment (decrease)" : "Stock adjustment (increase)"),
           refType: "InventoryAdjustment",
           createdById: ctx.userId,
         },
