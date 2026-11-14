@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Moon, Sun, LogOut, Menu, X, Command, Search, Bell, ChevronDown, PanelLeftClose } from "lucide-react";
+import { Moon, Sun, LogOut, Menu, X, Command, ChevronDown, PanelLeftClose, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { NAV } from "./nav";
 import { logoutAction } from "@/server/auth-actions";
@@ -50,8 +50,8 @@ export function Shell({ items, business, user, children }: {
   const side = (
     <div className="flex h-full flex-col">
       <div className={`flex h-[76px] items-center border-b border-line px-5 ${collapsed ? "justify-center" : "gap-3"}`}>
-        <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-brand text-brand-ink shadow-lg shadow-brand/20"><Command size={20}/></div>
-        {!collapsed && <div className="min-w-0"><p className="text-[15px] font-extrabold tracking-tight">Business<span className="text-brand">OS</span></p><p className="text-[10px] font-medium tracking-[.12em] text-muted">BUSINESS MANAGEMENT</p></div>}
+        <div className="relative grid size-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand to-violet-500 text-white shadow-lg shadow-brand/25"><Command size={20}/><span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-surface bg-emerald-400"/></div>
+        {!collapsed && <div className="min-w-0"><p className="text-[15px] font-extrabold tracking-tight">Business<span className="text-brand">OS</span></p><p className="flex items-center gap-1 text-[10px] font-semibold tracking-[.12em] text-muted"><Sparkles size={10}/> BUSINESS SUITE</p></div>}
       </div>
       <div className={`mx-3 mt-4 rounded-xl border border-line bg-surface-2/70 p-3 ${collapsed ? "hidden" : ""}`}>
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Current workspace</p>
@@ -79,14 +79,14 @@ export function Shell({ items, business, user, children }: {
     <div className="min-h-dvh bg-bg lg:grid" style={{ gridTemplateColumns: collapsed ? "84px minmax(0,1fr)" : "268px minmax(0,1fr)" }}>
       <aside className="sticky top-0 hidden h-dvh border-r border-line bg-surface lg:block">{side}</aside>
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-line bg-surface/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-line bg-surface/80 px-4 backdrop-blur-2xl sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button aria-label="Open menu" onClick={() => setOpen(true)} className="rounded-xl border border-line p-2 text-muted lg:hidden"><Menu size={18}/></button>
-            <div className="min-w-0"><p className="truncate text-[11px] font-medium text-muted">Workspace / <span className="text-ink">{NAV.find(n => path === n.href || path.startsWith(n.href + "/"))?.label ?? "Overview"}</span></p><p className="hidden text-xs text-muted sm:block">Manage your operations from one place</p></div>
+            <div className="min-w-0"><p className="truncate text-[11px] font-medium text-muted">YOUR WORKSPACE</p><p className="truncate text-sm font-semibold tracking-tight">{NAV.find(n => path === n.href || path.startsWith(n.href + "/"))?.label ?? "Overview"}</p></div>
           </div>
-          <div className="flex items-center gap-2"><div className="hidden items-center gap-2 rounded-xl border border-line bg-bg px-3 py-2 text-xs text-muted md:flex"><Search size={14}/>Quick search <kbd className="ml-3 rounded border border-line bg-surface px-1.5 py-0.5 text-[10px]">⌘ K</kbd></div><button aria-label="Notifications" className="relative rounded-xl border border-line p-2 text-muted hover:bg-surface-2"><Bell size={17}/><span className="absolute right-2 top-2 size-1.5 rounded-full bg-rose-500"/></button><div className="hidden size-9 place-items-center rounded-xl bg-brand-soft text-xs font-bold text-brand sm:grid">{user.slice(0,1).toUpperCase()}</div></div>
+          <div className="flex items-center gap-2"><button aria-label="Toggle theme" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="rounded-xl border border-line bg-surface p-2.5 text-muted shadow-sm transition hover:bg-surface-2 hover:text-ink">{resolvedTheme === "dark" ? <Sun size={16}/> : <Moon size={16}/>}</button><div className="hidden size-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-violet-500 text-xs font-bold text-white shadow-sm sm:grid">{user.slice(0,1).toUpperCase()}</div></div>
         </header>
-        <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1680px] p-4 sm:p-6 lg:p-9">{children}</main>
       </div>
       {open && <div className="fixed inset-0 z-50 lg:hidden"><button aria-label="Close menu" className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" onClick={() => setOpen(false)}/><div className="relative h-full w-[290px] bg-surface shadow-2xl"><button aria-label="Close" className="absolute right-3 top-5 z-10 rounded-lg p-2 text-muted hover:bg-surface-2" onClick={() => setOpen(false)}><X size={18}/></button>{side}</div></div>}
     </div>
