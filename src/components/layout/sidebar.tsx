@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Moon, Sun, LogOut, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NAV } from "./nav";
 import { logoutAction } from "@/server/auth-actions";
 
@@ -15,7 +15,12 @@ export function Shell({ items, business, user, children }: {
   const path = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const icons = Object.fromEntries(NAV.map((n) => [n.href, n.icon]));
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const nav = (
     <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
@@ -42,7 +47,7 @@ export function Shell({ items, business, user, children }: {
         <div className="flex gap-1">
           <button aria-label="Toggle dark mode" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
             className="grid size-8 place-items-center rounded-md hover:bg-surface-2">
-            {resolvedTheme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            {mounted ? (resolvedTheme === "dark" ? <Sun size={16} /> : <Moon size={16} />) : <span className="size-4" aria-hidden="true" />}
           </button>
           <form action={logoutAction}><button aria-label="Sign out" className="grid size-8 place-items-center rounded-md hover:bg-surface-2"><LogOut size={16} /></button></form>
         </div>
